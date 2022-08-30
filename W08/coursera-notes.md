@@ -269,6 +269,98 @@ connected component: maximal set of connected vertices
 
 ## Directed Graphs
 
+### Digraph representations
+
+in practice: use adjacency-lists representation (real-world digraphs tend to be sparse)
+
+representation | space | insert edge from v to w | edge from v to w? | iterate over vertices pointing from v?
+--- | --- | --- | --- | ---
+list of edges | E | 1 | E | E
+adjacency matrix | V^2 | 1* | 1 | V
+adjacency lists | E + V | 1 | outdegree(v) | outdegree(v)
+
+*disallows parallel edges
+
+### Digraph API
+
+```java
+public class Digraph
+    private final int V; // number of vertices
+    private final Bag<Integer>[] adj; // adjacency lists
+    public Digraph(int V) 
+    {
+        this.V = V;
+        adj = (Bag<Integer>[]) new Bag[V];
+        for(int v = 0; v < V; v++)
+        {
+            adj[v] = new Bag<Integer>();
+        }
+    }
+
+    void addEdge(int v, int w) // edge from v to w
+    {
+        adj[v].add(w);
+    }
+
+    Iterable<Integer> adj(int v) // vertices pointing from v
+    {
+        return adj[v];
+    }
+
+    Digraph reverse() // reverse of this digraph
+```
+
+performant representation: adjacency list: vertex-indexed array of lists/bags
+
+### Digraph Search
+
+*same method as for undirected graphs*
+
+DFS is a **digraph** algorithm
+
+DFS (to visit a vertex v)
+1. mark v as visited
+1. recursively visit all unmarked vertices w pointing from v
+
+```java
+public class DirectedDFS
+{
+    private boolean[] marked; // true if path from s
+
+    public DirectedDFS(Digraph G, int x)
+    {
+        marked = new boolean[G.V()];
+        dfs(G, s);
+    }
+
+    // recursive DFS does all the work
+    private void dfs(Digraph G, int v)
+    {
+        marked[v] = true;
+        for(int w : G.adj(v)) 
+        {
+            if(!marked[w])
+            {
+                dfs(G, w);
+            }
+        }
+    }
+
+    // is vertex reachable from s?
+    public boolean visited(int v)
+    {
+        return marked[v];
+    }
+}
+```
+
+*every program is a digraph* -> program control-flow analysis
+- dead-code elimination: find (and remove) unreachable code
+- infinite-loop detection: determine whether exit is unreachable
+
+7:21
+
+
 ### Topological Sort
 
 Use DFS!
