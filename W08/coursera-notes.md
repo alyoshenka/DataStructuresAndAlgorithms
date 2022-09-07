@@ -314,6 +314,8 @@ performant representation: adjacency list: vertex-indexed array of lists/bags
 
 ### Digraph Search
 
+#### DFS
+
 *same method as for undirected graphs*
 
 DFS is a **digraph** algorithm
@@ -354,19 +356,83 @@ public class DirectedDFS
 }
 ```
 
-*every program is a digraph* -> program control-flow analysis
-- dead-code elimination: find (and remove) unreachable code
-- infinite-loop detection: determine whether exit is unreachable
+*every program is a digraph*
+- program control-flow analysis
+    - dead-code elimination: find (and remove) unreachable code
+    - infinite-loop detection: determine whether exit is unreachable
+- mark-sweep garbage collector
+    - vertex = object, edge = reference
+    - roots: objects known to be directly accessible by program
+    - reachable objects: objects indirectly accessible by program
+    - mark: mark all reachable objects
+    - sweep: if object is unmarked, add to free list of memory
+    - memory cost: 1 extra mark bit per object, plus DFS stack
 
-7:21
+#### BFS
 
+same method as for undirected graphs
+
+BFS is a *digraph* algorithm
+
+BFS (from source vertex s):
+1. put s onto a FIFO queue, mark s as visited
+1. repeat until queue is empty:
+    1. remove least recently added vertex v
+    1. for each unmarked vertex pointing from v:
+        - add to queue and mark as visited
+
+BFS computes shortest paths from s to all other vertices in a digraph in time proportional to E + V
+
+multiple-source shortest paths: given a digraph and a set of source vertices, find the shortest path from any vertex in the set to each other vertex
+- how to implement multi-source constructor?
+    - use BFS, but initialize by enqueuing all source vertices
+
+Bare-bones web crawler:
+```java
+Queue<String> queue nre Queue<String>(); // queue of websites to crawl
+SET<String> discovered = new SET<String>(); // set of discovered sites
+
+String root = "http://www.princeton.edu"; 
+queue.enqueue(root); // start crawling from root site
+discovered.add(root);
+
+while(!queue.isEmpty())
+{
+    String v = queue.dequeue();
+    StdOut.println(v);
+    In in = new In(v); // read raw html from next website in queue
+    String input = in.readAll();
+
+    // use regular expression to find all URLS in website of form
+    // http://xxx.yyy.zzz (crude pattern misses relative URLs)
+    String regexp = "http://(\\w+\\.)*(\\w+)";
+    Pattern patter = Pattern.compile(regexp);
+    Matcher matcher = pattern.matcher(input);
+    while(matcher.find())
+    {
+        String w = matcher.group();
+        if(!discovered.contains(w))
+        {
+            discovered.add(w);
+            queue.enqueue(w);
+        }
+    }
+}
+```
 
 ### Topological Sort
+
+precedence scheduling: given a set of tasks to be completed with precedence constraints, in which order should they be scheduled?
+
+DAG (directed acyclic graph): digraph with no cycles
+
+topological order -> redraw DAG so all edges point upwards
 
 Use DFS!
 
 - run depth-first search
 - return vertices in reverse postorder
+    - when done with a vertex, put it onto a stack
 
 ```java
 public class DepthFirstOrder 
@@ -382,7 +448,7 @@ public class DepthFirstOrder
         for(int v = 0; v < G.V(); v++)
         {
             if(!marked[v]) { dfs(G, v); }
-        })
+        }
     }
 
     private dfs(DiGraph G, int v)
@@ -403,3 +469,79 @@ public class DepthFirstOrder
 - if directed cycle, topological order is impossible
 - if no directed cycle, DFS-based algorithm finds a topological order
 
+### Strong Components
+
+vertices v and w are **strongly connected** if there is a directed path from v to w *and* and directed path from w to v
+
+strong connectivity = equivalence relation:
+- v is strongly connected to v
+- if v is strongly connected to w, then w is strongly connected to v
+- if v is strongly connected to w and w to x, then v is strongly connected to x
+
+strong component: maximal subset of strongly-connected vertices
+
+#### Applications
+- ecological food webs
+    - vertex = species; edge = from producer to consumer
+    - strong component: subset of species with common energy flow
+- software modules
+    - vertex = software module; edge = from module to dependency
+    - strong component: subset of mutually interacting modules
+    - approach 1: package strong components together
+    - approach 2: use to improve design
+
+*core problem in Operations Research*
+
+#### Intuition
+- reverse graph: if the graph is reversed, it will still have the same strong components
+- kernel DAG: contract each strong component into a single vertex
+- **idea**
+    1. compute topological order (reverse postorder) in kernal DAG
+    1. run DFS, considering vertices in reverse topological order
+
+```java
+public class KosarajuSharirSCC
+{
+    private boolean marked[];
+    private int id[];
+    private int count;
+
+    public KosarajuSharirSCC(Digraph G)
+    {
+        marked = new int[G.V()];
+        id = new ind[G.V()];
+
+        // only new code needed from CC
+        DepthFirstOrder dfs = new DepthFirstOrder(G.reverse());
+        for(int v : dfs.reversePost())
+        // for(int v = 0; v < G.V(); v++) 
+        {
+            if(!marked[v])
+            {
+                dfs(G, v);
+                count++;
+            }
+        }
+    }
+
+    private void dfs(Digraph G, int v)
+    {
+        marked[v] = true;
+        id[v] = count;
+        for(int w : Graph.adj(v))
+            if(!marked[w])
+                dfs(G, w)
+    }
+
+    public boolean stronlyConnected(int v, int w)
+    { return id[v] == id[w]; }
+}
+```
+
+### Digraph Processing summary
+
+problem | algorithm
+--- | ---
+single-source reachability in a digraph | DFS
+topological sort in a DAG | DFS
+strong components in a digraph | Kosaraju DFS (twice)
