@@ -526,3 +526,12 @@ getNumberOfVertices | O(1)
 getNumberofEdges | O(1)
 clear | O(1)
 
+## 4.1 Undirected Graphs
+
+- tree: acyclic connected graph
+- forest: disjoint set of trees
+- spanning tree: subgraph of a connected graph that contains all of that graph's vertices and is a single tree
+- spanning forest: union of spanning trees of the connected components of a graph
+- bipartite graph: vertices can be divided into two sets such that all edges connect a vertex in one set to a vertex in another set
+
+Algorithms pg 553
