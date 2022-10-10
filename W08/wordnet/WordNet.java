@@ -45,6 +45,8 @@ public class WordNet {
                 nouns.add(syns); // don't need id because arraylist can be indexed
                 defs.add(gloss);
             }
+            buf.close();
+            synFR.close();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -99,7 +101,11 @@ public class WordNet {
         if (!(isNoun(nounA) && isNoun(nounB))) {
             throw new IllegalArgumentException();
         }
-        return -1;
+
+        // this can be optimized by using a map instead of a list
+        int a = nouns.indexOf(nounA);
+        int b = nouns.indexOf(nounB);
+        return sap.length(a, b);
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
@@ -111,7 +117,10 @@ public class WordNet {
         if (!(isNoun(nounA) && isNoun(nounB))) {
             throw new IllegalArgumentException();
         }
-        return null;
+        int a = nouns.indexOf(nounA);
+        int b = nouns.indexOf(nounB);
+        int c = sap.ancestor(a, b);
+        return nouns.get(c);
     }
 
     private void printNouns() {
@@ -124,6 +133,6 @@ public class WordNet {
     // do unit testing of this class
     public static void main(String[] args) {
         WordNet net = new WordNet("synsets.txt", "hymernyms.txt");
-        net.printNouns();
+        // net.printNouns();
     }
 }
