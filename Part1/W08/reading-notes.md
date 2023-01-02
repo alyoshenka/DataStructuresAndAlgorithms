@@ -534,4 +534,5 @@ clear | O(1)
 - spanning forest: union of spanning trees of the connected components of a graph
 - bipartite graph: vertices can be divided into two sets such that all edges connect a vertex in one set to a vertex in another set
 
-Algorithms pg 553
+## 4.2 Directed Graphs
+

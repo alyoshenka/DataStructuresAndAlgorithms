@@ -15,7 +15,8 @@ import java.util.List;
 
 public class WordNet {
 
-    private List<String> nouns;
+    private List<String> nouns; // use a map instead
+    // map all words to their index
     private List<String> defs;
     private Digraph graph;
     private int size;
@@ -40,6 +41,7 @@ public class WordNet {
             while ((line = buf.readLine()) != null) {
                 String[] parts = line.split(",", 3);
                 int id = Integer.parseInt(parts[0]);
+                // String syn = (parts[1].split(" "))[0];
                 String syns = parts[1];
                 String gloss = parts[2];
                 nouns.add(syns); // don't need id because arraylist can be indexed
@@ -62,7 +64,6 @@ public class WordNet {
             BufferedReader buf = new BufferedReader(synFR);
             String line;
             while ((line = buf.readLine()) != null) {
-                List<Integer> edges = new ArrayList<>();
                 String[] parts = line.split(",");
                 int hyponym = Integer.parseInt(parts[0]);
                 for (int i = 1; i < parts.length; i++) {
@@ -82,13 +83,13 @@ public class WordNet {
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
-        return nouns;
+        return new ArrayList<>(nouns);
     }
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
         if (word == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
         return nouns.contains(word);
     }
@@ -132,7 +133,19 @@ public class WordNet {
 
     // do unit testing of this class
     public static void main(String[] args) {
-        WordNet net = new WordNet("synsets.txt", "hymernyms.txt");
+        WordNet net = new WordNet("synsets.txt", "hypernyms.txt");
         // net.printNouns();
+
+        assert net.isNoun("crow_pheasant");
+        assert net.isNoun("modiolus");
+        assert !net.isNoun("navy_yard naval_shipyard");
+        assert net.isNoun("navy_yard");
+        assert net.isNoun("Henry_Martyn_Robert");
+        assert net.isNoun("anamorphosis");
+
+
+        net.distance("crow_pheasant", "modiolus");
+        net.sap("crow_pheasant", "modiolus");
+
     }
 }

@@ -38,8 +38,16 @@ public class SAP {
 
     // find parent of s that has no parents
     private int getRootFrom(int s) {
+        // System.out.println("root from " + s);
         DepthFirstPaths pathsFromS = new DepthFirstPaths(graph, s);
         for (int i = 0; i < size; i++) {
+
+            /*
+            if (pathsFromS.hasPathTo(i) && graph.outdegree(i) == 0) {
+                System.out.println("root option: " + i);
+            }
+
+             */
             if (pathsFromS.hasPathTo(i) && graph.outdegree(i) == 0) {
                 return i;
             }
@@ -271,9 +279,14 @@ public class SAP {
                 return w
          */
 
+        int bestAncestor = -1;
+        int shortestPath = Integer.MAX_VALUE;
+
 
         // won't this be applicable in any instance where you can get from v->w/w->v?
-        if (hasCycle()) {
+        // if (hasCycle()) {
+        if (new BreadthFirstPaths(graph, v).hasPathTo(w) && new BreadthFirstPaths(graph,
+                                                                                  w).hasPathTo(v)) {
             // can be optimized to store paths
             BreadthFirstPaths fromV = new BreadthFirstPaths(graph, v);
             BreadthFirstPaths fromw = new BreadthFirstPaths(graph, w);
@@ -308,7 +321,14 @@ public class SAP {
 
              */
 
-            return vLength < wLength ? w : v;
+            if (vLength < wLength) {
+                shortestPath = vLength;
+                bestAncestor = v;
+            }
+            else {
+                shortestPath = wLength;
+                bestAncestor = w;
+            }
         }
 
         // determine the root
@@ -355,8 +375,7 @@ public class SAP {
         // for every ancestor, run bfs
         // calculate dists v->a + w->a
         // return a with shortest dist
-        int bestAncestor = -1;
-        int shortestPath = Integer.MAX_VALUE;
+
         for (int a : anc) {
             // optimize!
             BreadthFirstPaths fromAncestor = new BreadthFirstPaths(reverse, a);
@@ -480,6 +499,12 @@ public class SAP {
         assert s3.length(7, 9) == 2;
         assert s3.ancestor(9, 2) == -1;
         assert s3.length(9, 2) == -1;
+        assert s3.ancestor(7, 12) == 8;
+        assert s3.length(7, 12) == 2;
+        assert s3.ancestor(0, 7) == 8;
+        assert s3.length(0, 7) == 4;
+        assert s3.ancestor(14, 7) == 8;
+        assert s3.length(14, 7) == 5;
 
         Digraph d9 = new Digraph(9);
         d9.addEdge(7, 6);
@@ -497,5 +522,12 @@ public class SAP {
         assert s9.length(1, 0) == 2;
         assert s9.length(8, 1) == -1;
         assert s9.ancestor(8, 1) == -1;
+        assert s9.length(1, 6) == 2;
+        assert s9.ancestor(5, 7) == 4;
+        assert s9.length(5, 7) == 4;
+        System.out.println(s9.getRootFrom(8));
+        System.out.println(s9.getRootFrom(5));
+        assert s9.ancestor(8, 5) == 8;
+        assert s9.length(8, 5) == 1;
     }
 }
